@@ -1,0 +1,40 @@
+# Dependency directories
+node_modules/
+.npm/
+
+# Environment variables
+# It is a best practice to ignore environment files containing sensitive credentials
+.env
+.env.local
+
+# Build artifacts
+# Compiled JavaScript files and build output folders are often ignored
+/dist
+/build
+/coverage
+/public # only if generated, not if it contains static assets
+/out
+.cache/
+.parcel-cache
+.next/ # for Next.js
+.nuxt/ # for Nuxt.js
+
+# Testing and debugging
+# Log files and debugger-related data should not be tracked
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+*.tgz
+.DS_Store # macOS specific
+/*.log
+
+# Editor and OS specific files
+# Prevents sharing configuration files specific to a developer's setup
+.vscode/
+.idea/
+*.suo
+*.user
+*.pid
+*.lock # except package-lock.json or yarn.lock
