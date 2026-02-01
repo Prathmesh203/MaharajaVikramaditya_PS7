@@ -1,16 +1,62 @@
-# React + Vite
+# Campus Placement Eligibility & Application System (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A production-ready React.js frontend for managing campus placements, featuring automated eligibility verification, readiness metrics, and fair hiring practices.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Dual-Role Authentication**: Secure login for Students and Companies.
+- **Student Dashboard**: 
+  - Real-time **Readiness Score** & Skill Gap Analysis.
+  - Automated **Eligibility Verification** for upcoming drives.
+- **Company Dashboard**:
+  - **Trust Score** metrics based on placement history.
+  - Job posting management and applicant tracking.
+- **Assessment Interface**:
+  - Timed MCQ and Short Answer tests.
+  - Instant results and performance breakdown.
+- **Responsive Design**: Mobile-first UI built with Tailwind CSS.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React.js (Vite)**: Fast, modern frontend framework.
+- **Tailwind CSS (v4)**: Utility-first styling.
+- **React Router**: Client-side routing.
+- **Context API**: State management for Authentication.
+- **Axios**: API integration (configured in `src/services/api.js`).
+- **Lucide React**: Iconography.
 
-## Expanding the ESLint configuration
+## Project Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+src/
+├── components/         # Reusable UI components
+│   ├── common/         # Atomic components (Button, Card, Input)
+│   ├── features/       # Feature-specific components (Auth, Dashboard, Test)
+│   └── layout/         # Layout components (Navbar, Footer)
+├── context/            # Global state (AuthContext)
+├── pages/              # Page components (Routes)
+├── services/           # API services and mock data
+├── utils/              # Utility functions (cn, etc.)
+└── hooks/              # Custom hooks
+```
+
+## Getting Started
+
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
+
+2.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```
+
+3.  **Build for Production**:
+    ```bash
+    npm run build
+    ```
+
+## API Integration
+
+The application is configured to connect to a backend via `src/services/api.js`. Update the `VITE_API_URL` environment variable to point to your live backend. Currently, it uses mock data for demonstration purposes.

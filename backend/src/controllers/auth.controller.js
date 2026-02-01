@@ -14,11 +14,18 @@ const registerUser = asyncHandler(async (req, res) => {
           res.status(400).json({ message: "User already exists" });
      }
 
+     // Initial status logic
+     let status = 'pending';
+     // For demo purposes, auto-approve students if needed, but requirements say otherwise.
+     // Sticking to schema default 'pending' unless admin.
+     if (role === 'admin') status = 'approved';
+
      const user = await User.create({
           name,
           email,
           password, // Stored as plain text
-          role: role || 'student'
+          role: role || 'student',
+          status
      });
 
      if (user) {
@@ -27,6 +34,7 @@ const registerUser = asyncHandler(async (req, res) => {
                name: user.name,
                email: user.email,
                role: user.role,
+               status: user.status,
                token: user.generateAuthToken()
           });
      } else {
@@ -47,6 +55,7 @@ const loginUser = asyncHandler(async (req, res) => {
                name: user.name,
                email: user.email,
                role: user.role,
+               status: user.status,
                token: user.generateAuthToken()
           });
      } else {
@@ -63,4 +72,54 @@ const getUserProfile = asyncHandler(async (req, res) => {
      res.json(user);
 });
 
-module.exports = { registerUser, loginUser, getUserProfile };
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateUserProfile = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+        user.name = req.body.name || user.name;
+        
+        if (req.body.password) {
+            user.password = req.body.password;
+        }
+
+        // Student Updates
+        if (user.role === 'student') {
+            user.collegeId = req.body.collegeId || user.collegeId;
+            user.branch = req.body.branch || user.branch;
+            user.graduationYear = req.body.graduationYear || user.graduationYear;
+            user.cgpa = req.body.cgpa || user.cgpa;
+            user.skills = req.body.skills ? req.body.skills.split(',').map(s=>s.trim()) : user.skills;
+            user.resume = req.body.resume || user.resume;
+            user.profileCompleted = true; // Mark complete on update
+        }
+
+        // Company Updates
+        if (user.role === 'company') {
+             user.companyDetails = {
+                  ...user.companyDetails,
+                  ...req.body.companyDetails
+             };
+        }
+
+        const updatedUser = await user.save();
+
+        res.json({
+            _id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            status: updatedUser.status,
+            token: updatedUser.generateAuthToken(),
+            // Return full object
+            ...updatedUser.toObject()
+        });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
+module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile };
