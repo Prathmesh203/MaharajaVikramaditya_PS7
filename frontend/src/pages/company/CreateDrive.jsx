@@ -5,6 +5,7 @@ import { Label } from '../../components/common/Label';
 import { Button } from '../../components/common/Button';
 import { driveService } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import { Plus, Trash2 } from 'lucide-react';
 
 export default function CreateDrive() {
   const navigate = useNavigate();
@@ -20,16 +21,42 @@ export default function CreateDrive() {
     testDate: ''
   });
 
+  const [questions, setQuestions] = useState([
+    { question: '', marks: 10 }
+  ]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleQuestionChange = (index, field, value) => {
+    const newQuestions = [...questions];
+    newQuestions[index][field] = value;
+    setQuestions(newQuestions);
+  };
+
+  const addQuestion = () => {
+    setQuestions([...questions, { question: '', marks: 10 }]);
+  };
+
+  const removeQuestion = (index) => {
+    if (questions.length > 1) {
+      setQuestions(questions.filter((_, i) => i !== index));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await driveService.createDrive(formData);
+      // Filter out empty questions
+      const validQuestions = questions.filter(q => q.question.trim() !== '');
+      
+      await driveService.createDrive({
+        ...formData,
+        questions: validQuestions
+      });
       alert("Drive created successfully!");
       navigate('/company/drives');
     } catch (error) {
@@ -40,18 +67,18 @@ export default function CreateDrive() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Post New Drive</h1>
-        <p className="text-slate-500">Create a new job opportunity for students.</p>
+        <p className="text-slate-500">Create a new job opportunity and set up the screening test.</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Job Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form id="create-drive-form" onSubmit={handleSubmit} className="space-y-6">
+      <form id="create-drive-form" onSubmit={handleSubmit} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Job Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">Job Title</Label>
               <Input
@@ -146,15 +173,64 @@ export default function CreateDrive() {
                     />
                 </div>
             </div>
-          </form>
-        </CardContent>
-        <CardFooter className="flex justify-end gap-2">
-            <Button variant="outline" type="button" onClick={() => navigate('/company/dashboard')}>Cancel</Button>
-            <Button type="submit" form="create-drive-form" isLoading={isLoading}>
-                Create Drive
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Screening Test Questions</CardTitle>
+            <Button type="button" onClick={addQuestion} size="sm" variant="outline" className="gap-2">
+              <Plus className="w-4 h-4" /> Add Question
             </Button>
-        </CardFooter>
-      </Card>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-500 mb-4">
+              Add questions for the screening test. Students must answer these before applying.
+            </p>
+            
+            {questions.map((q, index) => (
+              <div key={index} className="flex gap-4 items-start p-4 bg-slate-50 rounded-lg border border-slate-100">
+                <span className="mt-3 font-medium text-slate-400">#{index + 1}</span>
+                <div className="flex-1 space-y-2">
+                  <Label>Question</Label>
+                  <textarea
+                    value={q.question}
+                    onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
+                    className="w-full min-h-[60px] p-2 rounded-md border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="Enter question text..."
+                    required
+                  />
+                </div>
+                <div className="w-24 space-y-2">
+                  <Label>Marks</Label>
+                  <Input
+                    type="number"
+                    value={q.marks}
+                    onChange={(e) => handleQuestionChange(index, 'marks', e.target.value)}
+                    required
+                  />
+                </div>
+                {questions.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeQuestion(index)}
+                    className="mt-8 text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end gap-2">
+            <Button variant="outline" type="button" onClick={() => navigate('/company/drives')}>Cancel</Button>
+            <Button type="submit" isLoading={isLoading}>
+                Create Drive & Test
+            </Button>
+        </div>
+      </form>
     </div>
   );
 }

@@ -3,7 +3,14 @@ const mongoose = require('mongoose');
 const applicationSchema = mongoose.Schema({
     studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     driveId: { type: mongoose.Schema.Types.ObjectId, ref: 'Drive', required: true },
-    status: { type: String, enum: ['applied', 'shortlisted', 'rejected', 'test_pending', 'hired'], default: 'applied' },
+    status: { type: String, enum: ['applied', 'shortlisted', 'rejected', 'test_submitted', 'interview', 'selected'], default: 'applied' },
+    testAnswers: [{
+        questionId: String,
+        question: String,
+        answer: String,
+        marksObtained: { type: Number, default: 0 } // For manual grading
+    }],
+    testScore: { type: Number, default: 0 },
     appliedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 

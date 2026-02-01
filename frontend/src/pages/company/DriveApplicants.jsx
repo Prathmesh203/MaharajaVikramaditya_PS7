@@ -15,6 +15,9 @@ const DriveApplicants = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
+  const [selectedApp, setSelectedApp] = useState(null); // For viewing/grading
+  const [scoreInput, setScoreInput] = useState('');
+
   useEffect(() => {
     fetchApplicants();
   }, [driveId]);
@@ -37,9 +40,33 @@ const DriveApplicants = () => {
       setApplicants(applicants.map(app => 
         app._id === applicationId ? { ...app, status: newStatus } : app
       ));
+      if (selectedApp?._id === applicationId) {
+        setSelectedApp(prev => ({ ...prev, status: newStatus }));
+      }
     } catch (err) {
       alert('Failed to update status');
     }
+  };
+
+  const handleScoreUpdate = async () => {
+    if (!selectedApp || !scoreInput) return;
+    try {
+        await applicationService.updateStatus(selectedApp._id, undefined, Number(scoreInput));
+        // Update local state
+        setApplicants(applicants.map(app => 
+            app._id === selectedApp._id ? { ...app, testScore: Number(scoreInput) } : app
+        ));
+        setSelectedApp(prev => ({ ...prev, testScore: Number(scoreInput) }));
+        setScoreInput('');
+        alert("Score updated");
+    } catch (err) {
+        alert("Failed to update score");
+    }
+  };
+
+  const openReviewModal = (app) => {
+    setSelectedApp(app);
+    setScoreInput(app.testScore || '');
   };
 
   const getStatusColor = (status) => {
@@ -211,6 +238,74 @@ const DriveApplicants = () => {
           </table>
         </div>
       </div>
+
+      {/* Review Modal */}
+      {selectedApp && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-6 border-b">
+              <div>
+                <h2 className="text-xl font-bold">Review Application</h2>
+                <p className="text-slate-500">{selectedApp.studentId.name}</p>
+              </div>
+              <button onClick={() => setSelectedApp(null)} className="p-2 hover:bg-gray-100 rounded-full">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {selectedApp.testAnswers && selectedApp.testAnswers.length > 0 ? (
+                    <div className="space-y-6">
+                        <h3 className="font-semibold text-lg border-b pb-2">Test Answers</h3>
+                        {selectedApp.testAnswers.map((ans, idx) => (
+                            <div key={idx} className="bg-slate-50 p-4 rounded-lg">
+                                <p className="font-medium text-slate-900 mb-2">Q: {ans.question || 'Question text unavailable'}</p>
+                                <div className="bg-white p-3 rounded border text-slate-700 whitespace-pre-wrap">
+                                    {ans.answer}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-lg">
+                        No test answers submitted.
+                    </div>
+                )}
+
+                <div className="flex items-center gap-4 border-t pt-6">
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Score / Grading</label>
+                        <div className="flex gap-2">
+                            <input 
+                                type="number" 
+                                placeholder="Enter score" 
+                                value={scoreInput}
+                                onChange={(e) => setScoreInput(e.target.value)}
+                                className="flex-1 px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                            />
+                            <Button onClick={handleScoreUpdate} size="sm">Save Score</Button>
+                        </div>
+                    </div>
+                    <div className="flex gap-2 self-end">
+                        <Button 
+                            variant="outline" 
+                            className="text-red-600 hover:bg-red-50 border-red-200"
+                            onClick={() => handleStatusUpdate(selectedApp._id, 'rejected')}
+                        >
+                            Reject
+                        </Button>
+                        <Button 
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => handleStatusUpdate(selectedApp._id, 'shortlisted')}
+                        >
+                            Shortlist
+                        </Button>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

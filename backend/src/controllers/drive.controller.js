@@ -6,7 +6,7 @@ const Application = require('../model/application.model');
 // @route   POST /api/drives
 // @access  Private (Company)
 const createDrive = asyncHandler(async (req, res) => {
-    const { title, description, batchYear, cgpaCutoff, skills, salary, deadline, testDate } = req.body;
+    const { title, description, batchYear, cgpaCutoff, skills, salary, deadline, testDate, questions } = req.body;
 
     if (!title || !description || !batchYear || !cgpaCutoff || !salary || !deadline) {
         res.status(400);
@@ -20,13 +20,37 @@ const createDrive = asyncHandler(async (req, res) => {
         description,
         batchYear,
         cgpaCutoff,
-        skills: skills ? skills.split(',').map(s => s.trim()) : [],
+        skills: skills ? (Array.isArray(skills) ? skills : skills.split(',').map(s => s.trim())) : [],
         salary,
         deadline,
-        testDate
+        testDate,
+        questions: questions || []
     });
 
     res.status(201).json(drive);
+});
+
+// @desc    Get drive test details (questions)
+// @route   GET /api/drives/:id/test
+// @access  Private (Student)
+const getDriveTest = asyncHandler(async (req, res) => {
+    const drive = await Drive.findById(req.params.id);
+
+    if (!drive) {
+        res.status(404);
+        throw new Error('Drive not found');
+    }
+
+    // Check if student is eligible (Basic check)
+    // In production, we should check if student already applied or other criteria
+    
+    // We only return necessary fields for taking the test
+    res.json({
+        _id: drive._id,
+        title: drive.title,
+        questions: drive.questions,
+        duration: drive.duration // If we had duration
+    });
 });
 
 // @desc    Get all active drives (for students)
@@ -57,4 +81,4 @@ const getCompanyDrives = asyncHandler(async (req, res) => {
     res.json(enrichedDrives);
 });
 
-module.exports = { createDrive, getDrives, getCompanyDrives };
+module.exports = { createDrive, getDrives, getCompanyDrives, getDriveTest };

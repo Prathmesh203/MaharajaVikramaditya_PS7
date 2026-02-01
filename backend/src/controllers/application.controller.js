@@ -66,7 +66,7 @@ const getDriveApplications = asyncHandler(async (req, res) => {
 // @route   PUT /api/applications/:id/status
 // @access  Private (Company)
 const updateApplicationStatus = asyncHandler(async (req, res) => {
-    const { status } = req.body;
+    const { status, testScore } = req.body;
     const application = await Application.findById(req.params.id);
 
     if (!application) {
@@ -77,7 +77,9 @@ const updateApplicationStatus = asyncHandler(async (req, res) => {
     // Verify ownership (optional but good practice: check if drive belongs to company)
     // For now skipping complex check for speed, assuming protected route + company role is sufficient context
     
-    application.status = status;
+    if (status) application.status = status;
+    if (testScore !== undefined) application.testScore = testScore;
+    
     await application.save();
 
     res.json(application);
@@ -100,4 +102,44 @@ const getCompanyStats = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { applyToDrive, getStudentApplications, getDriveApplications, updateApplicationStatus, getCompanyStats };
+// @desc    Submit test and create application
+// @route   POST /api/applications/submit-test
+// @access  Private (Student)
+const submitTest = asyncHandler(async (req, res) => {
+    const { driveId, answers } = req.body;
+
+    const drive = await Drive.findById(driveId);
+    if (!drive) {
+        res.status(404);
+        throw new Error('Drive not found');
+    }
+
+    // Check if already applied
+    const alreadyApplied = await Application.findOne({
+        studentId: req.user._id,
+        driveId
+    });
+
+    if (alreadyApplied) {
+        res.status(400);
+        throw new Error('Already applied to this drive');
+    }
+
+    // Check Eligibility
+    if (req.user.cgpa < drive.cgpaCutoff) {
+        res.status(400);
+        throw new Error('Not eligible: CGPA criteria not met');
+    }
+
+    // Create application with test answers
+    const application = await Application.create({
+        studentId: req.user._id,
+        driveId,
+        status: 'test_submitted',
+        testAnswers: answers
+    });
+
+    res.status(201).json(application);
+});
+
+module.exports = { applyToDrive, getStudentApplications, getDriveApplications, updateApplicationStatus, getCompanyStats, submitTest };

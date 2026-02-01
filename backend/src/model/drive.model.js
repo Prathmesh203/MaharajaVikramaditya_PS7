@@ -11,6 +11,12 @@ const driveSchema = mongoose.Schema({
     salary: { type: String, required: true },
     deadline: { type: Date, required: true },
     testDate: { type: Date },
+    questions: [{
+        question: { type: String, required: true },
+        options: [String], // Optional for MCQ
+        type: { type: String, enum: ['text', 'mcq'], default: 'text' },
+        marks: { type: Number, default: 10 }
+    }],
     status: { type: String, enum: ['active', 'closed'], default: 'active' }
 }, { timestamps: true });
 

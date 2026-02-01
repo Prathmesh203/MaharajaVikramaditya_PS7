@@ -23,6 +23,7 @@ import DriveDetails from './pages/company/DriveDetails';
 import StudentHome from './pages/student/StudentHome';
 import StudentProfile from './pages/student/StudentProfile';
 import StudentApply from './pages/student/StudentApply';
+import TakeTest from './pages/student/TakeTest';
 
 // Test Pages
 import TestInterface from './pages/TestInterface';
@@ -126,6 +127,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['student']} requireApproval={false}>
               <StudentApply />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/student/test/:driveId" 
+          element={
+            <ProtectedRoute allowedRoles={['student']} requireApproval={false}>
+              <TakeTest />
             </ProtectedRoute>
           } 
         />

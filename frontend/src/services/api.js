@@ -45,13 +45,15 @@ export const driveService = {
   createDrive: (data) => api.post('/drives', data),
   getDrives: () => api.get('/drives'), // For students
   getCompanyDrives: () => api.get('/drives/company'), // For company
+  getDriveTest: (driveId) => api.get(`/drives/${driveId}/test`), // New: Fetch drive with questions
 };
 
 export const applicationService = {
   apply: (driveId) => api.post('/applications', { driveId }),
+  submitTest: (data) => api.post('/applications/submit-test', data), // New: Submit test and create application
   getMyApplications: () => api.get('/applications/my'),
   getDriveApplications: (driveId) => api.get(`/applications/drive/${driveId}`),
-  updateStatus: (appId, status) => api.put(`/applications/${appId}/status`, { status }), // New method
+  updateStatus: (appId, status, testScore) => api.put(`/applications/${appId}/status`, { status, testScore }),
   getStats: () => api.get('/applications/stats'),
 };
 

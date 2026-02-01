@@ -137,9 +137,9 @@ export default function StudentHome() {
                   <Button 
                     className="w-full" 
                     disabled={!eligible || applied || applying === drive._id}
-                    onClick={() => handleApply(drive._id)}
+                    onClick={() => handleApply(drive)}
                   >
-                    {applied ? 'Applied' : applying === drive._id ? 'Applying...' : eligible ? 'Apply Now' : 'Not Eligible'}
+                    {applied ? 'Applied' : applying === drive._id ? 'Applying...' : eligible ? (drive.questions?.length > 0 ? 'Take Test & Apply' : 'Apply Now') : 'Not Eligible'}
                   </Button>
                 </CardFooter>
               </Card>
